@@ -33,7 +33,7 @@ class ZeneduClient:
             for bot in bots
         ]
 
-    def get_all_customers_by_bot_id(self, bot_id: int, per_page=30, page=1) -> list[Subscriber]:
+    def get_all_subscribers_by_bot_id(self, bot_id: int, per_page=30, page=1) -> list[Subscriber]:
         params = {"per_page": per_page, "page": page}
         response = self.http_client.get(
             f"api/v1/bot/{bot_id}/subscribers",

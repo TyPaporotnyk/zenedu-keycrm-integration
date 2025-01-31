@@ -41,7 +41,7 @@ class LoadAllSubscribersUseCase:
             if not bot.is_active:
                 return
 
-            subscribers = self.zenedu_client.get_all_customers_by_bot_id(bot_id=bot.id)
+            subscribers = self.zenedu_client.get_all_subscribers_by_bot_id(bot_id=bot.id)
             logger.info("Received %s customer by bot id %s", len(subscribers), bot.id)
 
             for subscriber in subscribers:

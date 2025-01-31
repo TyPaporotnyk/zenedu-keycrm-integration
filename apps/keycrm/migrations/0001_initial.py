@@ -27,9 +27,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "created_at",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Дата создания"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Дата создания"),
                 ),
                 (
                     "updated_at",
@@ -57,9 +55,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "created_at",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="Дата создания"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="Дата создания"),
                 ),
                 (
                     "updated_at",
@@ -68,9 +64,7 @@ class Migration(migrations.Migration):
                 ("is_active", models.BooleanField(default=True)),
                 (
                     "bot",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="zenedu.bot"
-                    ),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="zenedu.bot"),
                 ),
                 (
                     "pipeline",
