@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "zenedu-keycrm-integration"
+version = "0.1.0"
+description = ""
+authors = ["TyPaporotnyk <daniil.svadkovsky@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.5"
+httpx = "^0.28.1"
+django-environ = "^0.12.0"
+mysqlclient = "^2.2.7"
+django-cors-headers = "^4.6.0"
+punq = "^0.7.0"
+celery = {extras = ["amqp"], version = "^5.4.0"}
+python-dotenv = "^1.0.1"
+django-celery-beat = "^2.7.0"
+django-mysql = "^4.15.0"
+redis = "^5.2.1"
+django-redis = "^5.4.0"
+gunicorn = "^23.0.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+isort = "^5.13.2"
+flake8 = "^7.1.1"
+pre-commit = "^4.1.0"
+flower = "^2.0.1"
+
+[tool.black]
+line-length = 119
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+line_length = 119
+skip = ["migrations/"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
