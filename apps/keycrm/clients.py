@@ -115,6 +115,7 @@ class KeyCRMClient:
             phones=data["phone"],
         )
 
+    @rate_limit(key_prefix="keycrm-client-rate-limit")
     def update_client(self, client: entities.Client) -> entities.Client:
         fields_mapping = {
             "full_name": client.full_name,
