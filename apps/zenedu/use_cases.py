@@ -1,7 +1,6 @@
 import logging
 from dataclasses import dataclass
 
-from apps.keycrm.services import IntegrationService
 from apps.zenedu.clients import ZeneduClient
 from apps.zenedu.services import BotService, SubscriberService
 
@@ -31,7 +30,6 @@ class LoadAllSubscribersUseCase:
     zenedu_client: ZeneduClient
     bot_service: BotService
     subscriber_service: SubscriberService
-    integration_service: IntegrationService
 
     def execute(self):
         from apps.keycrm.tasks import create_subscriber_to_crm_task, update_subscriber_to_crm_task
@@ -43,17 +41,12 @@ class LoadAllSubscribersUseCase:
             if not bot.is_active:
                 return
 
-            integration = self.integration_service.get_by_bot_id(bot_id=bot.id)
-
             subscribers = self.zenedu_client.get_all_subscribers_by_bot_id(bot_id=bot.id)
             logger.info("Received %s customer by bot id %s", len(subscribers), bot.id)
 
             for subscriber in subscribers:
                 old_subscriber = self.subscriber_service.get_by_id(subscriber_id=subscriber.id)
                 new_subscriber, is_created = self.subscriber_service.create_or_update(subscriber=subscriber)
-
-                if not integration:
-                    return
 
                 if is_created:
                     logger.info("Subscriber %s has been created successfuly", new_subscriber.id)
