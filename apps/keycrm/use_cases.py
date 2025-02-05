@@ -36,36 +36,37 @@ class CreateSubscriberToCrmUseCase:
 
     def execute(self, subscriber_id: int, bot_id: int):
         subscriber = self.subscriber_service.get_by_id(subscriber_id=subscriber_id)
-        integration = self.integration_service.get_by_bot_id(bot_id=bot_id)
+        integrations = self.integration_service.get_all_by_bot_id(bot_id=bot_id)
 
         if not subscriber:
             logger.warning("There is no subscriber by id: %s", subscriber_id)
             return
 
-        if not integration:
-            logger.warning("There is no integration with bot id: %s", bot_id)
+        if not integrations:
+            logger.warning("There is no integrations with bot id: %s", bot_id)
             return
 
-        if not integration.is_active:
-            return
+        for integration in integrations:
+            if not integration.is_active:
+                return
 
-        client = Client(
-            full_name=" ".join([value for value in [subscriber.first_name, subscriber.last_name] if value]),
-            phones=[subscriber.phone],
-            username=subscriber.username,
-        )
-        received_client = self.keycrm_client.create_client(client=client)
-        logger.info("Clint %s has been created successfuly", received_client.id)
+            client = Client(
+                full_name=" ".join([value for value in [subscriber.first_name, subscriber.last_name] if value]),
+                phones=[subscriber.phone],
+                username=subscriber.username,
+            )
+            received_client = self.keycrm_client.create_client(client=client)
+            logger.info("Clint %s has been created successfuly", received_client.id)
 
-        lead = Lead(
-            client_id=received_client.id,
-            pipeline_id=integration.pipeline_id,
-        )
-        received_lead = self.keycrm_client.create_lead(lead=lead)
-        logger.info("Lead %s has been created successfuly", received_lead.id)
+            lead = Lead(
+                client_id=received_client.id,
+                pipeline_id=integration.pipeline_id,
+            )
+            received_lead = self.keycrm_client.create_lead(lead=lead)
+            logger.info("Lead %s has been created successfuly", received_lead.id)
 
-        self.subscriber_service.partial_update(subscriber_id=subscriber_id, source_id=received_client.id)
-        logger.info("Subscriber %s source id %s has been updated successfuly", subscriber_id, received_client.id)
+            self.subscriber_service.partial_update(subscriber_id=subscriber_id, source_id=received_client.id)
+            logger.info("Subscriber %s source id %s has been updated successfuly", subscriber_id, received_client.id)
 
 
 @dataclass(frozen=True, eq=False)
@@ -77,7 +78,7 @@ class UpdateSubscriberToCrmUseCase:
 
     def execute(self, subscriber_id: int, bot_id: int):
         subscriber = self.subscriber_service.get_by_id(subscriber_id=subscriber_id)
-        integration = self.integration_service.get_by_bot_id(bot_id=bot_id)
+        integration = self.integration_service.get_all_by_bot_id(bot_id=bot_id)
 
         if not subscriber:
             logger.warning("There is no subscriber by id: %s", subscriber_id)

@@ -19,10 +19,6 @@ class PipelineService:
 
 class IntegrationService:
 
-    def get_by_bot_id(self, bot_id: int) -> entities.Integration:
-        try:
-            obj = Integration.objects.get(bot_id=bot_id)
-
-            return obj.to_entity()
-        except Integration.DoesNotExist:
-            return None
+    def get_all_by_bot_id(self, bot_id: int) -> list[entities.Integration]:
+        objs = Integration.objects.filter(bot_id=bot_id)
+        return [obj.to_entity() for obj in objs]
