@@ -50,6 +50,7 @@ class KeyCRMClient:
             pipeline_id=data["pipeline_id"],
             manager_id=data["manager_id"],
             client_id=data["contact"]["client_id"],
+            source_id=data["source_id"],
         )
 
     @rate_limit(key_prefix="keycrm-client-rate-limit")
@@ -57,6 +58,7 @@ class KeyCRMClient:
         json_data = {
             "manager_id": lead.manager_id,
             "pipeline_id": lead.pipeline_id,
+            "source_id": lead.source_id,
             "contact": {"client_id": lead.client_id},
         }
 

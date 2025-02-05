@@ -22,6 +22,7 @@ class Lead:
     manager_id: int = field(default=1, kw_only=True)
     client_id: int | None
     pipeline_id: int
+    source_id: int | None = field(default=2, kw_only=True)
 
 
 @dataclass
