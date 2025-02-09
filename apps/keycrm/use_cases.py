@@ -101,8 +101,8 @@ class UpdateSubscriberToCrmUseCase:
 
             logger.info("Clint %s has been received successfuly", received_client.id)
 
-            received_client.phones = [] if received_client.phones else [subscriber.phone]
-            received_client.username = None if received_client.username else subscriber.username
+            received_client.phones = [] if received_client.phones == subscriber.phone else [subscriber.phone]
+            received_client.username = None if received_client.username == subscriber.username else subscriber.username
 
             self.keycrm_client.update_client(client=received_client)
             logger.info("Clint %s has been updated successfuly", received_client.id)
