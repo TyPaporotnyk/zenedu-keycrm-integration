@@ -1,11 +1,10 @@
 import logging
 from dataclasses import dataclass
-from logging import Logger
 
 from apps.keycrm.clients import KeyCRMClient
 from apps.keycrm.entities import Client, Lead
 from apps.keycrm.services import IntegrationService, PipelineService
-from apps.zenedu.services import SubscriberService
+from apps.zenedu.services import BotService, SubscriberService
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +32,12 @@ class CreateSubscriberToCrmUseCase:
     subscriber_service: SubscriberService
     integration_service: IntegrationService
     keycrm_client: KeyCRMClient
+    bot_service: BotService
 
     def execute(self, subscriber_id: int, bot_id: int):
         subscriber = self.subscriber_service.get_by_id(subscriber_id=subscriber_id)
         integrations = self.integration_service.get_all_by_bot_id(bot_id=bot_id)
+        bot = self.bot_service.get_by_id(bot_id=bot_id)
 
         if not subscriber:
             logger.warning("There is no subscriber by id: %s", subscriber_id)
@@ -61,6 +62,7 @@ class CreateSubscriberToCrmUseCase:
             lead = Lead(
                 client_id=received_client.id,
                 pipeline_id=integration.pipeline_id,
+                bot=bot.name,
             )
             received_lead = self.keycrm_client.create_lead(lead=lead)
             logger.info("Lead %s has been created successfuly", received_lead.id)
@@ -74,7 +76,6 @@ class UpdateSubscriberToCrmUseCase:
     subscriber_service: SubscriberService
     integration_service: IntegrationService
     keycrm_client: KeyCRMClient
-    logger: Logger
 
     def execute(self, subscriber_id: int, bot_id: int):
         subscriber = self.subscriber_service.get_by_id(subscriber_id=subscriber_id)

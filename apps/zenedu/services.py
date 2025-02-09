@@ -4,6 +4,14 @@ from apps.zenedu.models import Bot, Subscriber
 
 class BotService:
 
+    def get_by_id(self, bot_id: int) -> entities.Bot | None:
+        try:
+            obj = Bot.objects.get(pk=bot_id)
+
+            return obj.to_entity()
+        except Bot.DoesNotExist:
+            return None
+
     def get_all_active_bots(self) -> list[entities.Bot]:
         bots = Bot.objects.filter(is_active=True)
         return [bot.to_entity() for bot in bots]

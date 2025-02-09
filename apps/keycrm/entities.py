@@ -23,6 +23,7 @@ class Lead:
     client_id: int | None
     pipeline_id: int
     source_id: int | None = field(default=2, kw_only=True)
+    bot: str | None = field(default=None, kw_only=True)
 
 
 @dataclass

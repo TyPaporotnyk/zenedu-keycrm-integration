@@ -55,11 +55,15 @@ class KeyCRMClient:
 
     @rate_limit(key_prefix="keycrm-client-rate-limit")
     def create_lead(self, lead: entities.Lead) -> entities.Lead:
+        custom_fields = [
+            {"uuid": "LD_1016", "value": lead.bot} if lead.bot else None,
+        ]
         json_data = {
             "manager_id": lead.manager_id,
             "pipeline_id": lead.pipeline_id,
             "source_id": lead.source_id,
             "contact": {"client_id": lead.client_id},
+            "custom_fields": [field for field in custom_fields if field],
         }
 
         response = self.http_client.post("/pipelines/cards", headers=self._get_header(), json=json_data)
@@ -98,10 +102,12 @@ class KeyCRMClient:
 
     @rate_limit(key_prefix="keycrm-client-rate-limit")
     def create_client(self, client: entities.Client) -> entities.Client:
+        custom_fields = [{"uuid": "CT_1015", "value": client.username} if client.username else None]
+
         fields_mapping = {
             "full_name": client.full_name,
-            "custom_fields": ([{"uuid": "CT_1015", "value": client.username}] if client.username else None),
-            "phone": client.phones if client.phones else None,
+            "custom_fields": [field for field in custom_fields if field],
+            "phone": client.phones or None,
         }
 
         json_data = {key: value for key, value in fields_mapping.items() if value is not None}
@@ -119,10 +125,12 @@ class KeyCRMClient:
 
     @rate_limit(key_prefix="keycrm-client-rate-limit")
     def update_client(self, client: entities.Client) -> entities.Client:
+        custom_fields = [{"uuid": "CT_1015", "value": client.username} if client.username else None]
+
         fields_mapping = {
             "full_name": client.full_name,
-            "custom_fields": ([{"uuid": "CT_1015", "value": client.username}] if client.username else None),
-            "phone": client.phones if client.phones else None,
+            "custom_fields": [field for field in custom_fields if field],
+            "phone": client.phones or None,
         }
 
         json_data = {key: value for key, value in fields_mapping.items() if value is not None}
