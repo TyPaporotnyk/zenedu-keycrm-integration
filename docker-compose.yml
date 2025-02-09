@@ -26,7 +26,7 @@ services:
   web:
     <<: *app-common
     volumes:
-      - ./staticfiles:/app/staticfiles
+      - ./staticfiles:/app/staticfiles:rw
     command: poetry run gunicorn config.wsgi --bind 0.0.0.0:8000 --workers ${WORKERS} --log-level=debug --chdir=/app
 
   celery:
