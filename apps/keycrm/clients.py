@@ -1,9 +1,12 @@
+import logging
 from dataclasses import dataclass
 
 from httpx import Client, HTTPStatusError
 
 from apps.common.utils import rate_limit
 from apps.keycrm import entities
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -47,6 +50,7 @@ class KeyCRMClient:
 
         return entities.Lead(
             id=data["id"],
+            title=data["title"],
             pipeline_id=data["pipeline_id"],
             manager_id=data["manager_id"],
             client_id=data["contact"]["client_id"],
@@ -59,6 +63,7 @@ class KeyCRMClient:
             {"uuid": "LD_1016", "value": lead.bot} if lead.bot else None,
         ]
         json_data = {
+            "title": lead.title,
             "manager_id": lead.manager_id,
             "pipeline_id": lead.pipeline_id,
             "source_id": lead.source_id,
@@ -74,6 +79,7 @@ class KeyCRMClient:
 
         return entities.Lead(
             id=data["id"],
+            title=data["title"],
             pipeline_id=data["pipeline_id"],
             manager_id=data["manager_id"],
             client_id=data["contact"]["client_id"],
@@ -97,20 +103,19 @@ class KeyCRMClient:
         return entities.Client(
             id=data["id"],
             full_name=data["full_name"],
-            phones=data["phone"],
         )
 
     @rate_limit(key_prefix="keycrm-client-rate-limit")
     def create_client(self, client: entities.Client) -> entities.Client:
-        custom_fields = [{"uuid": "CT_1015", "value": client.username} if client.username else None]
+        custom_fields = [
+            {"uuid": "CT_1015", "value": client.username} if client.username else None,
+            {"uuid": "CT_1020", "value": client.phone} if client.phone else None,
+        ]
 
-        fields_mapping = {
+        json_data = {
             "full_name": client.full_name,
             "custom_fields": [field for field in custom_fields if field],
-            "phone": client.phones or None,
         }
-
-        json_data = {key: value for key, value in fields_mapping.items() if value is not None}
 
         response = self.http_client.post("/buyer", headers=self._get_header(), json=json_data)
 
@@ -120,20 +125,20 @@ class KeyCRMClient:
         return entities.Client(
             id=data["id"],
             full_name=data["full_name"],
-            phones=data["phone"],
+            phone=data["phone"],
         )
 
     @rate_limit(key_prefix="keycrm-client-rate-limit")
     def update_client(self, client: entities.Client) -> entities.Client:
-        custom_fields = [{"uuid": "CT_1015", "value": client.username} if client.username else None]
+        custom_fields = [
+            {"uuid": "CT_1015", "value": client.username} if client.username else None,
+            {"uuid": "CT_1020", "value": client.phone} if client.phone else None,
+        ]
 
-        fields_mapping = {
+        json_data = {
             "full_name": client.full_name,
             "custom_fields": [field for field in custom_fields if field],
-            "phone": client.phones or None,
         }
-
-        json_data = {key: value for key, value in fields_mapping.items() if value is not None}
 
         response = self.http_client.put(f"/buyer/{client.id}", headers=self._get_header(), json=json_data)
 
@@ -143,5 +148,5 @@ class KeyCRMClient:
         return entities.Client(
             id=data["id"],
             full_name=data["full_name"],
-            phones=data["phone"],
+            phone=data["phone"],
         )

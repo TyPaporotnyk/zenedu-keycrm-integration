@@ -49,26 +49,31 @@ class CreateSubscriberToCrmUseCase:
 
         for integration in integrations:
             if not integration.is_active:
-                return
+                continue
 
-            client = Client(
-                full_name=" ".join([value for value in [subscriber.first_name, subscriber.last_name] if value]),
-                phones=[subscriber.phone],
-                username=subscriber.username,
-            )
-            received_client = self.keycrm_client.create_client(client=client)
-            logger.info("Clint %s has been created successfuly", received_client.id)
+            if not subscriber.source_id:
+                client = Client(
+                    full_name=" ".join([value for value in [subscriber.first_name, subscriber.last_name] if value]),
+                    phone=subscriber.phone,
+                    username=subscriber.username,
+                )
+                received_client = self.keycrm_client.create_client(client=client)
+                logger.info("Clint %s has been created successfuly", received_client.id)
+
+                self.subscriber_service.partial_update(subscriber_id=subscriber_id, source_id=received_client.id)
+                subscriber.source_id = received_client.id
+                logger.info(
+                    "Subscriber %s source id %s has been updated successfuly", subscriber_id, received_client.id
+                )
 
             lead = Lead(
-                client_id=received_client.id,
+                title=f"Подписчик {bot.name}",
+                client_id=subscriber.source_id,
                 pipeline_id=integration.pipeline_id,
                 bot=bot.name,
             )
             received_lead = self.keycrm_client.create_lead(lead=lead)
             logger.info("Lead %s has been created successfuly", received_lead.id)
-
-            self.subscriber_service.partial_update(subscriber_id=subscriber_id, source_id=received_client.id)
-            logger.info("Subscriber %s source id %s has been updated successfuly", subscriber_id, received_client.id)
 
 
 @dataclass(frozen=True, eq=False)
@@ -89,20 +94,23 @@ class UpdateSubscriberToCrmUseCase:
             logger.warning("There is no integrations with bot id: %s", bot_id)
             return
 
-        for integration in integrations:
-            if not integration.is_active:
-                return
+        if not subscriber.source_id:
+            logger.warning("Subscriber %s source id is not provided", subscriber.id)
+            return
 
-            received_client = self.keycrm_client.get_client_by_id(client_id=subscriber.source_id)
+        received_client = self.keycrm_client.get_client_by_id(client_id=subscriber.source_id)
 
-            if not received_client:
-                logger.warning("There is no client by id: %s", subscriber.source_id)
-                return
+        if not received_client:
+            logger.warning("There is no client by id: %s", subscriber.source_id)
+            return
 
-            logger.info("Clint %s has been received successfuly", received_client.id)
+        logger.info("Clint %s has been received successfuly", received_client.id)
 
-            received_client.phones = [] if received_client.phones == subscriber.phone else [subscriber.phone]
-            received_client.username = None if received_client.username == subscriber.username else subscriber.username
+        received_client.full_name = " ".join(
+            [value for value in [subscriber.first_name, subscriber.last_name] if value]
+        )
+        received_client.phone = None if received_client.phone == subscriber.phone else subscriber.phone
+        received_client.username = None if received_client.username == subscriber.username else subscriber.username
 
-            self.keycrm_client.update_client(client=received_client)
-            logger.info("Clint %s has been updated successfuly", received_client.id)
+        self.keycrm_client.update_client(client=received_client)
+        logger.info("Clint %s has been updated successfuly", received_client.id)
