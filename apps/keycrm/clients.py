@@ -34,6 +34,23 @@ class KeyCRMClient:
         return [entities.Pipeline(id=pipeline["id"], name=pipeline["title"]) for pipeline in pipelines]
 
     @rate_limit(key_prefix="keycrm-client-rate-limit")
+    def add_payment_to_lead(self, lead_id: int, payment: entities.Payment):
+        json_data = {
+            "payment_method_id": payment.payment_method_id,
+            "payment_method": payment.payment_method,
+            "amount": payment.amount,
+            "status": payment.status,
+            "description": payment.description,
+            "payment_date": payment.payment_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "transaction_uuid": payment.transaction_uuid,
+        }
+        response = self.http_client.post(
+            f"/pipelines/cards/{lead_id}/payment", headers=self._get_header(), json=json_data
+        )
+
+        response.raise_for_status()
+
+    @rate_limit(key_prefix="keycrm-client-rate-limit")
     def get_lead_by_id(self, lead_id: int) -> entities.Lead:
         params = {"include": "contact.client"}
         response = self.http_client.get(f"/pipelines/cards/{lead_id}", headers=self._get_header(), params=params)

@@ -23,9 +23,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_celery_beat",
     "django_mysql",
+    "drf_spectacular",
+    "rest_framework",
     "apps.common",
     "apps.keycrm",
     "apps.zenedu",
+    "apps.webhook",
 ]
 
 MIDDLEWARE = [
@@ -38,6 +41,29 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
+    "SERVE_PUBLIC": True,
+    "SCHEMA_PATH_PREFIX": r"/api/v1",
+    "SCHEMA_COERCE_PATH_PK_SUFFIX": True,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "COMPONENT_NO_READ_ONLY_REQUIRED": True,
+    "COMPONENT_SPLIT_PATCHES": True,
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+        "showExtensions": True,
+        "deepLinking": True,
+    },
+    "ENABLE_DJANGO_DEPLOY_CHECK": False,
+    "DISABLE_ERRORS_AND_WARNINGS": True,
+}
+
 
 ROOT_URLCONF = "config.urls"
 

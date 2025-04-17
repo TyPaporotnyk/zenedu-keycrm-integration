@@ -4,6 +4,7 @@ DEBUG = True
 
 LOGGING = {
     "version": 1,
+    "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
             "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s",
@@ -16,10 +17,21 @@ LOGGING = {
             "formatter": "verbose",
         },
     },
-    # "loggers": {
-    #     "django.db.backends": {
-    #         "handlers": ["console"],
-    #         "level": "DEBUG",
-    #     },
-    # },
+    "loggers": {
+        "django.request": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "apps": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        # "django.db.backends": {
+        #     "handlers": ["console"],
+        #     "level": "DEBUG",
+        #     "propagate": False,
+        # },
+    },
 }

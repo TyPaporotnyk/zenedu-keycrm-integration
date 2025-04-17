@@ -20,6 +20,8 @@ django-mysql = "^4.15.0"
 redis = "^5.2.1"
 django-redis = "^5.4.0"
 gunicorn = "^23.0.0"
+djangorestframework = "^3.16.0"
+drf-spectacular = "^0.28.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Optional
 
 
@@ -34,3 +35,14 @@ class Integration:
     bot_id: int
     pipeline_id: int
     is_active: bool
+
+
+@dataclass
+class Payment:
+    amount: float
+    status: str
+    description: str
+    payment_date: datetime
+    transaction_uuid: str
+    payment_method_id: int = 6
+    payment_method: str = "WayForPay"
