@@ -7,4 +7,4 @@ class PaymentWebhookSerializer(serializers.Serializer):
     description = serializers.CharField()
     status = serializers.ChoiceField(choices=(("paid", "Paid"), ("closed", "Closed")))
     payment_date = serializers.DateTimeField()
-    transaction_uuid = serializers.CharField()
+    # transaction_uuid = serializers.CharField()

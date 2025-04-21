@@ -43,6 +43,6 @@ class Payment:
     status: str
     description: str
     payment_date: datetime
-    transaction_uuid: str
+    # transaction_uuid: str
     payment_method_id: int = 6
     payment_method: str = "WayForPay"

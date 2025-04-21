@@ -42,7 +42,7 @@ class KeyCRMClient:
             "status": payment.status,
             "description": payment.description,
             "payment_date": payment.payment_date.strftime("%Y-%m-%d %H:%M:%S"),
-            "transaction_uuid": payment.transaction_uuid,
+            # "transaction_uuid": payment.transaction_uuid,
         }
         response = self.http_client.post(
             f"/pipelines/cards/{lead_id}/payment", headers=self._get_header(), json=json_data
