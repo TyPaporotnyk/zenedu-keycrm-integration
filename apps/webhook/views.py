@@ -27,7 +27,6 @@ class WFPPaymentWebhook(decorators.APIView):
             description=serializer.validated_data["description"],
             status=serializer.validated_data["status"],
             payment_date=serializer.validated_data["payment_date"],
-            # transaction_uuid=serializer.validated_data["transaction_uuid"],
         )
 
         try:
@@ -35,14 +34,12 @@ class WFPPaymentWebhook(decorators.APIView):
         except Exception as e:
             logger.warning(
                 "Some error occured while adding transaction to lead %s: %s",
-                # serializer.validated_data["transaction_uuid"],
                 serializer.validated_data["lead_id"],
                 repr(e),
             )
         else:
             logger.info(
                 "Transaction hass been added to lead %s successfuly",
-                # serializer.validated_data["transaction_uuid"],
                 serializer.validated_data["lead_id"],
             )
 
