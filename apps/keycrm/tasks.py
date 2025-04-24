@@ -18,12 +18,12 @@ def load_all_pipelines_task():
 
 
 @shared_task()
-def create_subscriber_to_crm_task(subscriber_id: int, bot_id: int):
+def create_subscriber_to_crm_task(subscriber_id: int, bot_id: int, order_id: int | None):
     container = get_container()
 
     use_case: CreateSubscriberToCrmUseCase = container.resolve(CreateSubscriberToCrmUseCase)
 
-    use_case.execute(subscriber_id=subscriber_id, bot_id=bot_id)
+    use_case.execute(subscriber_id=subscriber_id, bot_id=bot_id, order_id=order_id)
 
 
 @shared_task()

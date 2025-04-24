@@ -10,7 +10,7 @@ from apps.keycrm.clients import KeyCRMClient
 from apps.keycrm.services import IntegrationService, PipelineService
 from apps.keycrm.use_cases import CreateSubscriberToCrmUseCase, LoadAllPipelinesUseCase, UpdateSubscriberToCrmUseCase
 from apps.zenedu.clients import ZeneduClient
-from apps.zenedu.services import BotService, SubscriberService
+from apps.zenedu.services import BotService, OrderService, SubscriberService
 from apps.zenedu.use_cases import LoadAllBotsUseCase, LoadAllSubscribersUseCase
 
 
@@ -44,6 +44,7 @@ def _initialize_container() -> punq.Container:
     container.register(SubscriberService, scope=Scope.singleton)
     container.register(PipelineService, scope=Scope.singleton)
     container.register(BotService, scope=Scope.singleton)
+    container.register(OrderService, scope=Scope.singleton)
 
     container.register(LoadAllBotsUseCase, scope=Scope.singleton)
     container.register(LoadAllPipelinesUseCase, scope=Scope.singleton)

@@ -54,3 +54,33 @@ class Subscriber(TimedBaseModel):
         verbose_name = "Subscriber"
         verbose_name_plural = "Subscribers"
         ordering = ["-created_at"]
+
+
+class Order(TimedBaseModel):
+    price = models.FloatField()
+    source_id = models.PositiveIntegerField()
+    currency = models.CharField(max_length=20)
+    status = models.CharField(max_length=20)
+    payment_system_type = models.CharField(max_length=20)
+    subscriber = models.ForeignKey(Subscriber, on_delete=models.CASCADE)
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.bot}, {self.subscriber}, {self.price} {self.currency}"
+
+    def to_entity(self) -> entities.Order:
+        return entities.Order(
+            id=self.id,
+            source_id=self.source_id,
+            price=self.price,
+            currency=self.currency,
+            status=self.status,
+            payment_system_type=self.payment_system_type,
+            subscriber=self.subscriber.to_entity(),
+            created_at=self.created_at,
+        )
+
+    class Meta:
+        verbose_name = "Order"
+        verbose_name_plural = "Orders"
+        ordering = ["-created_at"]

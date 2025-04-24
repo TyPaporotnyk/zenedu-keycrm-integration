@@ -2,9 +2,10 @@ import logging
 from dataclasses import dataclass
 
 from apps.keycrm.clients import KeyCRMClient
-from apps.keycrm.entities import Client, Lead
+from apps.keycrm.entities import Client, Lead, Payment
 from apps.keycrm.services import IntegrationService, PipelineService
-from apps.zenedu.services import BotService, SubscriberService
+from apps.keycrm.utils import get_payment_description
+from apps.zenedu.services import BotService, OrderService, SubscriberService
 
 logger = logging.getLogger(__name__)
 
@@ -30,14 +31,16 @@ class LoadAllPipelinesUseCase:
 @dataclass(frozen=True, eq=False)
 class CreateSubscriberToCrmUseCase:
     subscriber_service: SubscriberService
+    order_service: OrderService
     integration_service: IntegrationService
     keycrm_client: KeyCRMClient
     bot_service: BotService
 
-    def execute(self, subscriber_id: int, bot_id: int):
+    def execute(self, subscriber_id: int, bot_id: int, order_id: int | None):
         subscriber = self.subscriber_service.get_by_id(subscriber_id=subscriber_id)
         integrations = self.integration_service.get_all_by_bot_id(bot_id=bot_id)
         bot = self.bot_service.get_by_id(bot_id=bot_id)
+        order = self.order_service.get_by_id(order_id=order_id) if order_id else None
 
         if not subscriber:
             logger.warning("There is no subscriber by id: %s", subscriber_id)
@@ -74,6 +77,16 @@ class CreateSubscriberToCrmUseCase:
             )
             received_lead = self.keycrm_client.create_lead(lead=lead)
             logger.info("Lead %s has been created successfuly", received_lead.id)
+
+            if order:
+                payment = Payment(
+                    amount=order.price,
+                    status="paid",
+                    payment_date=order.created_at,
+                    description=get_payment_description(subscriber=subscriber, bot=bot),
+                )
+                self.keycrm_client.add_payment_to_lead(lead_id=received_lead.id, payment=payment)
+                logger.info("Payment has been added to lead %s successfuly", received_lead.id)
 
 
 @dataclass(frozen=True, eq=False)

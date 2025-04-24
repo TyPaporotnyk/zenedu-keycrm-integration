@@ -2,7 +2,8 @@ import logging
 from dataclasses import dataclass
 
 from apps.zenedu.clients import ZeneduClient
-from apps.zenedu.services import BotService, SubscriberService
+from apps.zenedu.entities import Bot, Order, Subscriber
+from apps.zenedu.services import BotService, OrderService, SubscriberService
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +31,9 @@ class LoadAllSubscribersUseCase:
     zenedu_client: ZeneduClient
     bot_service: BotService
     subscriber_service: SubscriberService
+    order_service: OrderService
 
     def execute(self):
-        from apps.keycrm.tasks import create_subscriber_to_crm_task, update_subscriber_to_crm_task
-
         bots = self.bot_service.get_all_active_bots()
         logger.info("Selected %s active bots", len(bots))
 
@@ -41,7 +41,9 @@ class LoadAllSubscribersUseCase:
             if not bot.is_active:
                 return
 
-            subscribers = self.zenedu_client.get_all_subscribers_by_bot_id(bot_id=bot.id, per_page=100)
+            subscribers = self.zenedu_client.get_subscribers_by_bot_id(bot_id=bot.id, per_page=100)
+            orders = self.zenedu_client.get_orders_by_bot_id(bot_id=bot.id, per_page=100)
+
             logger.info("Received %s customer by bot id %s", len(subscribers), bot.id)
 
             for subscriber in subscribers:
@@ -49,8 +51,31 @@ class LoadAllSubscribersUseCase:
                 new_subscriber, is_created = self.subscriber_service.create_or_update(subscriber=subscriber)
 
                 if is_created:
-                    logger.info("Subscriber %s has been created successfuly", new_subscriber.id)
-                    create_subscriber_to_crm_task.delay(subscriber_id=new_subscriber.id, bot_id=bot.id)
+                    self._create_new_subscriber(subscriber=new_subscriber, bot=bot, orders=orders)
                 elif new_subscriber != old_subscriber:
-                    logger.info("Subscriber %s has been updated successfuly", new_subscriber.id)
-                    update_subscriber_to_crm_task.delay(subscriber_id=new_subscriber.id, bot_id=bot.id)
+                    self._update_old_subscriber(subscriber_id=new_subscriber.id, bot_id=bot.id)
+
+    def _create_new_subscriber(self, subscriber: Subscriber, bot: Bot, orders: list[Order]):
+        from apps.keycrm.tasks import create_subscriber_to_crm_task
+
+        subscriber_order = None
+        for order in orders:
+            if order.subscriber.id == subscriber.source_id:
+                order.subscriber.id = subscriber.id
+                order.bot = bot
+
+                created_order, _ = self.order_service.create_or_update(order=order)
+                subscriber_order = created_order
+                logger.info("Found order %s for new subscriber %s", order.source_id, subscriber.id)
+                break
+
+        logger.info("Subscriber %s has been created successfuly", subscriber.id)
+        create_subscriber_to_crm_task.delay(
+            subscriber_id=subscriber.id, bot_id=bot.id, order_id=subscriber_order.id if subscriber_order else None
+        )
+
+    def _update_old_subscriber(self, subscriber: Subscriber, bot: Bot):
+        from apps.keycrm.tasks import update_subscriber_to_crm_task
+
+        logger.info("Subscriber %s has been updated successfuly", subscriber.id)
+        update_subscriber_to_crm_task.delay(subscriber_id=subscriber.id, bot_id=bot.id)

@@ -1,5 +1,5 @@
 from apps.zenedu import entities
-from apps.zenedu.models import Bot, Subscriber
+from apps.zenedu.models import Bot, Order, Subscriber
 
 
 class BotService:
@@ -32,10 +32,17 @@ class BotService:
 
 
 class SubscriberService:
-
     def get_by_id(self, subscriber_id: int) -> entities.Subscriber | None:
         try:
             obj = Subscriber.objects.get(pk=subscriber_id)
+
+            return obj.to_entity()
+        except Subscriber.DoesNotExist:
+            return None
+
+    def get_by_email(self, subscriber_email: str) -> entities.Subscriber | None:
+        try:
+            obj = Subscriber.objects.get(email=subscriber_email)
 
             return obj.to_entity()
         except Subscriber.DoesNotExist:
@@ -79,3 +86,33 @@ class SubscriberService:
         obj.save()
 
         return obj.to_entity()
+
+
+class OrderService:
+
+    def get_by_id(self, order_id: int) -> entities.Order | None:
+        try:
+            obj = Order.objects.get(pk=order_id)
+
+            return obj.to_entity()
+        except Order.DoesNotExist:
+            return None
+
+    def create_or_update(self, order: entities.Order) -> tuple[entities.Subscriber, bool]:
+        defaults = {
+            "source_id": order.source_id,
+            "price": order.price,
+            "currency": order.currency,
+            "status": order.status,
+            "payment_system_type": order.payment_system_type,
+            "subscriber_id": order.subscriber.id,
+            "created_at": order.created_at,
+            "bot_id": order.bot.id,
+        }
+        obj, is_created = Order.objects.update_or_create(
+            id=order.id,
+            defaults=defaults,
+            create_defaults=defaults,
+        )
+
+        return obj.to_entity(), is_created

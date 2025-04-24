@@ -7,3 +7,4 @@ staticfiles/
 media/*
 !media/.gitkeep
 .pytest_cache
+test.py
