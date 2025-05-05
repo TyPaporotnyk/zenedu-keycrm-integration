@@ -42,7 +42,6 @@ class KeyCRMClient:
             "status": payment.status,
             "description": payment.description,
             "payment_date": payment.payment_date.strftime("%Y-%m-%d %H:%M:%S"),
-            # "transaction_uuid": payment.transaction_uuid,
         }
         response = self.http_client.post(
             f"/pipelines/cards/{lead_id}/payment", headers=self._get_header(), json=json_data
@@ -77,7 +76,11 @@ class KeyCRMClient:
     @rate_limit(key_prefix="keycrm-client-rate-limit")
     def create_lead(self, lead: entities.Lead) -> entities.Lead:
         custom_fields = [
-            {"uuid": "LD_1016", "value": lead.bot} if lead.bot else None,
+            {"uuid": "LD_1016", "value": lead.bot} if lead.bot else None,  # bot name
+            {"uuid": "LD_1004", "value": lead.price} if lead.price else None,  # price
+            {"uuid": "LD_1024", "value": lead.currency} if lead.currency else None,  # currency
+            {"uuid": "LD_1016", "value": lead.status} if lead.status else None,  # status
+            {"uuid": "LD_1022", "value": lead.payment_methhod} if lead.payment_methhod else None,  # payment methhod
         ]
         json_data = {
             "title": lead.title,

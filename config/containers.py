@@ -9,6 +9,7 @@ from punq import Scope
 from apps.keycrm.clients import KeyCRMClient
 from apps.keycrm.services import IntegrationService, PipelineService
 from apps.keycrm.use_cases import CreateSubscriberToCrmUseCase, LoadAllPipelinesUseCase, UpdateSubscriberToCrmUseCase
+from apps.wayforpay.client import WayForPayClient
 from apps.zenedu.clients import ZeneduClient
 from apps.zenedu.services import BotService, OrderService, SubscriberService
 from apps.zenedu.use_cases import LoadAllBotsUseCase, LoadAllSubscribersUseCase
@@ -39,6 +40,15 @@ def _initialize_container() -> punq.Container:
         )
 
     container.register(KeyCRMClient, factory=init_keycrm_client, scope=Scope.singleton)
+
+    def init_way_for_pay_client():
+        return WayForPayClient(
+            http_client=Client(base_url="https://api.wayforpay.com"),
+            merchant_account=settings.WAY_FOR_PAY_MERCHANT_ACCOUNT,
+            merchant_secret_key=settings.WAY_FOR_PAY_SECRET_KEY,
+        )
+
+    container.register(WayForPayClient, factory=init_way_for_pay_client, scope=Scope.singleton)
 
     container.register(IntegrationService, scope=Scope.singleton)
     container.register(SubscriberService, scope=Scope.singleton)

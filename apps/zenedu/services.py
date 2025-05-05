@@ -116,3 +116,11 @@ class OrderService:
         )
 
         return obj.to_entity(), is_created
+
+    def partial_update(self, order_id: int, **fields) -> entities.Order:
+        obj = Order.objects.get(pk=order_id)
+        for key, value in fields.items():
+            setattr(obj, key, value)
+        obj.save()
+
+        return obj.to_entity()

@@ -34,6 +34,7 @@ class Subscriber(TimedBaseModel):
     last_name = models.CharField(max_length=255, blank=True, null=True)
     username = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
     created_at = models.DateTimeField()
 
     def to_entity(self) -> entities.Subscriber:
@@ -45,6 +46,7 @@ class Subscriber(TimedBaseModel):
             username=self.username,
             phone=self.phone,
             created_at=self.created_at,
+            email=self.email,
         )
 
     def __str__(self):

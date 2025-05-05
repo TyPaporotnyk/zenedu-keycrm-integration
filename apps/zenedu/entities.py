@@ -19,6 +19,7 @@ class Subscriber:
     last_name: str | None
     username: str | None
     phone: str | None
+    email: str | None
     created_at: datetime
 
     @property

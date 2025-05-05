@@ -1,11 +1,15 @@
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
+from apps.wayforpay.client import WayForPayClient
+from apps.wayforpay.entities import Transaction
 from apps.zenedu.clients import ZeneduClient
 from apps.zenedu.entities import Bot, Order, Subscriber
 from apps.zenedu.services import BotService, OrderService, SubscriberService
 
 logger = logging.getLogger(__name__)
+DATE_BEGIN_INDEX = 5
 
 
 @dataclass
@@ -32,9 +36,13 @@ class LoadAllSubscribersUseCase:
     bot_service: BotService
     subscriber_service: SubscriberService
     order_service: OrderService
+    way_for_pay_client: WayForPayClient
 
     def execute(self):
         bots = self.bot_service.get_all_active_bots()
+        transactions = self.way_for_pay_client.get_transaction_list(
+            date_begin=datetime.now() - timedelta(days=DATE_BEGIN_INDEX), date_end=datetime.now()
+        )
         logger.info("Selected %s active bots", len(bots))
 
         for bot in bots:
@@ -51,11 +59,15 @@ class LoadAllSubscribersUseCase:
                 new_subscriber, is_created = self.subscriber_service.create_or_update(subscriber=subscriber)
 
                 if is_created:
-                    self._create_new_subscriber(subscriber=new_subscriber, bot=bot, orders=orders)
+                    self._create_new_subscriber(
+                        subscriber=new_subscriber, bot=bot, orders=orders, transactions=transactions
+                    )
                 elif new_subscriber != old_subscriber:
                     self._update_old_subscriber(subscriber_id=new_subscriber.id, bot_id=bot.id)
 
-    def _create_new_subscriber(self, subscriber: Subscriber, bot: Bot, orders: list[Order]):
+    def _create_new_subscriber(
+        self, subscriber: Subscriber, bot: Bot, orders: list[Order], transactions: list[Transaction]
+    ):
         from apps.keycrm.tasks import create_subscriber_to_crm_task
 
         subscriber_order = None
@@ -68,6 +80,15 @@ class LoadAllSubscribersUseCase:
                 subscriber_order = created_order
                 logger.info("Found order %s for new subscriber %s", order.source_id, subscriber.id)
                 break
+
+        subscriber_transaction: Transaction = (
+            next([tramsaction for tramsaction in transactions if tramsaction.phone == subscriber.phone], None)
+            if subscriber_order
+            else None
+        )
+
+        if subscriber_transaction:
+            self.subscriber_service.partial_update(subscriber_id=subscriber.id, email=subscriber_transaction.email)
 
         logger.info("Subscriber %s has been created successfuly", subscriber.id)
         create_subscriber_to_crm_task.delay(

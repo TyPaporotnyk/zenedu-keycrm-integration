@@ -2,9 +2,8 @@ import logging
 from dataclasses import dataclass
 
 from apps.keycrm.clients import KeyCRMClient
-from apps.keycrm.entities import Client, Lead, Payment
+from apps.keycrm.entities import Client, Lead
 from apps.keycrm.services import IntegrationService, PipelineService
-from apps.keycrm.utils import get_payment_description
 from apps.zenedu.services import BotService, OrderService, SubscriberService
 
 logger = logging.getLogger(__name__)
@@ -75,18 +74,17 @@ class CreateSubscriberToCrmUseCase:
                 pipeline_id=integration.pipeline_id,
                 bot=bot.name,
             )
-            received_lead = self.keycrm_client.create_lead(lead=lead)
-            logger.info("Lead %s has been created successfuly", received_lead.id)
 
             if order:
-                payment = Payment(
-                    amount=order.price,
-                    status="paid",
-                    payment_date=order.created_at,
-                    description=get_payment_description(subscriber=subscriber, bot=bot),
-                )
-                self.keycrm_client.add_payment_to_lead(lead_id=received_lead.id, payment=payment)
-                logger.info("Payment has been added to lead %s successfuly", received_lead.id)
+                lead.price = order.price
+                lead.status = "paid"
+                lead.currency = order.currency
+
+                if order.payment_system_type == "wayforpay":
+                    lead.payment_methhod = "Безготівковий (WayForPay)"
+
+            received_lead = self.keycrm_client.create_lead(lead=lead)
+            logger.info("Lead %s has been created successfuly", received_lead.id)
 
 
 @dataclass(frozen=True, eq=False)

@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "apps.keycrm",
     "apps.zenedu",
     "apps.webhook",
+    "apps.wayforpay",
 ]
 
 MIDDLEWARE = [
@@ -178,3 +179,5 @@ CACHES = {
 }
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
+WAY_FOR_PAY_MERCHANT_ACCOUNT = env("WAY_FOR_PAY_MERCHANT_ACCOUNT")
+WAY_FOR_PAY_SECRET_KEY = env("WAY_FOR_PAY_SECRET_KEY")

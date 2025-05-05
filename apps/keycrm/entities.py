@@ -27,6 +27,10 @@ class Lead:
     pipeline_id: int
     source_id: int | None = field(default=2, kw_only=True)
     bot: str | None = field(default=None, kw_only=True)
+    price: int | None = field(default=None, kw_only=True)
+    currency: str | None = field(default=None, kw_only=True)
+    status: str | None = field(default=None, kw_only=True)
+    payment_methhod: str | None = field(default=None, kw_only=True)
 
 
 @dataclass
