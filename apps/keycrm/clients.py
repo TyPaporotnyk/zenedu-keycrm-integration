@@ -130,6 +130,7 @@ class KeyCRMClient:
         custom_fields = [
             {"uuid": "CT_1015", "value": client.username} if client.username else None,
             {"uuid": "CT_1020", "value": client.phone} if client.phone else None,
+            {"uuid": "CT_1028", "value": client.email} if client.email else None,
         ]
 
         json_data = {

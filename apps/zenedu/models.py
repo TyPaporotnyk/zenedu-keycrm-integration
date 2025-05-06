@@ -63,7 +63,7 @@ class Order(TimedBaseModel):
     source_id = models.PositiveIntegerField()
     currency = models.CharField(max_length=20)
     status = models.CharField(max_length=20)
-    payment_system_type = models.CharField(max_length=20)
+    payment_system_type = models.CharField(max_length=20, null=True, blank=True)
     subscriber = models.ForeignKey(Subscriber, on_delete=models.CASCADE)
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
 

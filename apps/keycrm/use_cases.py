@@ -58,6 +58,7 @@ class CreateSubscriberToCrmUseCase:
                     full_name=" ".join([value for value in [subscriber.first_name, subscriber.last_name] if value]),
                     phone=subscriber.phone,
                     username=subscriber.username,
+                    email=subscriber.email,
                 )
                 received_client = self.keycrm_client.create_client(client=client)
                 logger.info("Clint %s has been created successfuly", received_client.id)

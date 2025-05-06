@@ -14,6 +14,7 @@ class Client:
     id: Optional[int] = field(default=None, kw_only=True)
     phone: Optional[str] = field(default=None, kw_only=True)
     username: Optional[str] = field(default=None, kw_only=True)
+    email: Optional[str] = field(default=None, kw_only=True)
     manager_id: int = field(default=1, kw_only=True)
     full_name: str
 

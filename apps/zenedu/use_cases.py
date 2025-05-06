@@ -72,8 +72,7 @@ class LoadAllSubscribersUseCase:
 
         subscriber_order = None
         for order in orders:
-            if order.subscriber.id == subscriber.source_id:
-                order.subscriber.id = subscriber.id
+            if order.subscriber.id == subscriber.id:
                 order.bot = bot
 
                 created_order, _ = self.order_service.create_or_update(order=order)
@@ -82,7 +81,7 @@ class LoadAllSubscribersUseCase:
                 break
 
         subscriber_transaction: Transaction = (
-            next([tramsaction for tramsaction in transactions if tramsaction.phone == subscriber.phone], None)
+            next((tramsaction for tramsaction in transactions if tramsaction.phone == subscriber.phone), None)
             if subscriber_order
             else None
         )

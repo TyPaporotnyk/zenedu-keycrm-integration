@@ -53,6 +53,7 @@ class ZeneduClient:
                 last_name=subscriber["last_name"],
                 username=subscriber["username"],
                 phone=subscriber["phone"],
+                email=subscriber["email"],
                 created_at=parse_datetime(subscriber["created_at"]),
             )
             for subscriber in subscribers
@@ -78,6 +79,7 @@ class ZeneduClient:
                 last_name=data["last_name"],
                 username=data["username"],
                 phone=data["phone"],
+                email=data["email"],
                 created_at=parse_datetime(data["created_at"]),
             )
 
