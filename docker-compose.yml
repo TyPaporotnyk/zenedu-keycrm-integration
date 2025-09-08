@@ -17,7 +17,7 @@ services:
     volumes:
       - ./staticfiles:/app/staticfiles:rw
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"
     command: poetry run gunicorn config.wsgi --bind 0.0.0.0:8000 --workers ${WORKERS} --log-level=debug --chdir=/app
 
   celery:
